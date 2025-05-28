@@ -4,7 +4,7 @@ import 'dotenv/config';
 const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(session());
 
-const steps = ['fio', 'contact', 'company', 'description'];
+const steps = ['fio', 'contact', 'company', 'description', 'confirm'];
 
 bot.start(async (ctx) => {
   ctx.session = {};
@@ -25,6 +25,14 @@ bot.on('text', async (ctx) => {
     return;
   }
 
+  // Если ожидается контакт, а пришёл текст
+  if (step === 'contact') {
+    await ctx.reply('Пожалуйста, используйте кнопку «Отправить номер телефона» ниже, чтобы отправить свой номер.', Markup.keyboard([
+      Markup.button.contactRequest('Отправить номер телефона')
+    ]).oneTime().resize());
+    return;
+  }
+
   if (step === 'company') {
     ctx.session.company = ctx.message.text;
     ctx.session.step++;
@@ -34,12 +42,32 @@ bot.on('text', async (ctx) => {
 
   if (step === 'description') {
     ctx.session.description = ctx.message.text;
-    // Формируем заявку
-    const msg = `📝 Новая корпоративная заявка\n\n👤 ФИО: ${ctx.session.fio}\n🏢 Компания: ${ctx.session.company}\n✉️ Контакт: ${ctx.session.contact}\n💬 Комментарий: ${ctx.session.description}`;
-    // Отправляем менеджеру
-    await ctx.telegram.sendMessage(process.env.MANAGER_CHAT_ID, msg);
-    await ctx.reply('Спасибо! Ваша заявка отправлена.');
-    ctx.session = null;
+    // Проверяем, что контакт был получен
+    if (!ctx.session.contact) {
+      ctx.session.step = 1; // возвращаемся к шагу контакта
+      await ctx.reply('Пожалуйста, отправьте ваш номер телефона кнопкой ниже:', Markup.keyboard([
+        Markup.button.contactRequest('Отправить номер телефона')
+      ]).oneTime().resize());
+      return;
+    }
+    ctx.session.step++;
+    // Показываем кнопку "Отправить заявку"
+    const summary = `Проверьте заявку перед отправкой:\n\n📝 Новая корпоративная заявка\n\n👤 ФИО: ${ctx.session.fio}\n🏢 Компания: ${ctx.session.company}\n✉️ Контакт: ${ctx.session.contact}\n💬 Комментарий: ${ctx.session.description}`;
+    await ctx.reply(summary, Markup.keyboard([
+      ['Отправить заявку']
+    ]).oneTime().resize());
+    return;
+  }
+
+  if (step === 'confirm') {
+    if (ctx.message.text === 'Отправить заявку') {
+      const msg = `📝 Новая корпоративная заявка\n\n👤 ФИО: ${ctx.session.fio}\n🏢 Компания: ${ctx.session.company}\n✉️ Контакт: ${ctx.session.contact}\n💬 Комментарий: ${ctx.session.description}`;
+      await ctx.telegram.sendMessage(process.env.MANAGER_CHAT_ID, msg);
+      await ctx.reply('Спасибо, наш менеджер свяжется с Вами в самое ближайшее время', Markup.removeKeyboard());
+      ctx.session = null;
+    } else {
+      await ctx.reply('Пожалуйста, нажмите кнопку "Отправить заявку" для завершения.');
+    }
     return;
   }
 });
