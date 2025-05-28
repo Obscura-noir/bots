@@ -60,10 +60,14 @@ bot.on('text', async (ctx) => {
   }
 
   if (step === 'confirm') {
-    if (ctx.message.text === 'Отправить заявку') {
+    if (ctx.message.text && ctx.message.text.trim().toLowerCase() === 'отправить заявку') {
       const msg = `📝 Новая корпоративная заявка\n\n👤 ФИО: ${ctx.session.fio}\n🏢 Компания: ${ctx.session.company}\n✉️ Контакт: ${ctx.session.contact}\n💬 Комментарий: ${ctx.session.description}`;
-      await ctx.telegram.sendMessage(process.env.MANAGER_CHAT_ID, msg);
-      await ctx.reply('Спасибо, наш менеджер свяжется с Вами в самое ближайшее время', Markup.removeKeyboard());
+      try {
+        await ctx.telegram.sendMessage(process.env.MANAGER_CHAT_ID, msg);
+        await ctx.reply('Спасибо, наш менеджер свяжется с Вами в самое ближайшее время', Markup.removeKeyboard());
+      } catch (e) {
+        await ctx.reply('Ошибка при отправке заявки. Пожалуйста, попробуйте позже.');
+      }
       ctx.session = null;
     } else {
       await ctx.reply('Пожалуйста, нажмите кнопку "Отправить заявку" для завершения.');
