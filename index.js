@@ -66,7 +66,7 @@ bot.on('text', async (ctx) => {
         await ctx.telegram.sendMessage(process.env.MANAGER_CHAT_ID, msg);
         await ctx.reply('Спасибо, наш менеджер свяжется с Вами в самое ближайшее время', Markup.removeKeyboard());
       } catch (e) {
-        await ctx.reply('Ошибка при отправке заявки. Пожалуйста, попробуйте позже.');
+        await ctx.reply('Ошибка при отправке заявки. Пожалуйста, попробуйте позже или напишите нашему менеджеру @ib_afipay.');
       }
       ctx.session = null;
     } else {
