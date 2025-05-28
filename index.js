@@ -8,10 +8,7 @@ const steps = ['fio', 'contact', 'user_id', 'company', 'description', 'confirm']
 
 bot.start(async (ctx) => {
   ctx.session = {};
-  // Отправляем картинку
-  await ctx.replyWithPhoto({ source: 'welcome.jpg' });
-  // Отправляем приветственный текст
-  await ctx.reply('Привет! Меня зовут Снежана. И я самый сексуальный бот в мире. Давайте оформим заявку на платеж.\nПожалуйста, введите ваше шикарное ФИО:');
+  await ctx.reply('Привет! Меня зовут Олег. Я Ваш персональный менеджер. Давайте оформим заявку на платеж.\nПожалуйста, введите ваши Фамилию и  Имя:');
   ctx.session.step = 0;
 });
 
