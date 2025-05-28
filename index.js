@@ -8,7 +8,10 @@ const steps = ['fio', 'contact', 'company', 'description', 'confirm'];
 
 bot.start(async (ctx) => {
   ctx.session = {};
-  await ctx.reply('Привет! Давайте оформим заявку на платеж.\nПожалуйста, введите ваше ФИО:');
+  // Отправляем картинку
+  await ctx.replyWithPhoto({ source: 'welcome.jpg' });
+  // Отправляем приветственный текст
+  await ctx.reply('Привет! Меня зовут Снежана. И я самый сексуальный бот в мире. Давайте оформим заявку на платеж.\nПожалуйста, введите ваше шикарное ФИО:');
   ctx.session.step = 0;
 });
 
@@ -19,7 +22,7 @@ bot.on('text', async (ctx) => {
   if (step === 'fio') {
     ctx.session.fio = ctx.message.text;
     ctx.session.step++;
-    await ctx.reply('Пожалуйста, отправьте ваш номер телефона кнопкой ниже:', Markup.keyboard([
+    await ctx.reply('Пожалуйста, отправьте Мне ваш Длинный номер телефона кнопкой ниже.....:', Markup.keyboard([
       Markup.button.contactRequest('Отправить номер телефона')
     ]).oneTime().resize());
     return;
